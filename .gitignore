@@ -1,0 +1,5 @@
+./venv/
+./MNIST_Data/
+./__pycache__/
+./.vscode/
+softmax_params.npz
