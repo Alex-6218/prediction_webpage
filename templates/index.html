@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Digit Classifier</title>
+  <style>
+    canvas { border:1px solid #ccc; background:#fff; cursor: crosshair; }
+    #result { margin-top:10px; font-size:1.2em; }
+  </style>
+</head>
+<body>
+  <h2>Draw a digit</h2>
+  <canvas id="canvas" width="280" height="280"></canvas><br>
+  <button id="clear">Clear</button>
+  <button id="submit">Classify</button>
+  <pre id="result"></pre>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
