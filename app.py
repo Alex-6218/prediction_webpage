@@ -26,9 +26,10 @@ def classify_image(img_arr_28x28):
 
     logitsZ = x @ weightsT + biasB # shape (m, K)
     predictions = np.array([np.clip(np.exp(logitsZ[logit, :] - np.max(logitsZ[logit, :])), 0, None) for logit in range(logitsZ.shape[0])]) #Softmax logits to get prediction vector of shape (m, K)
+    predictions = predictions / np.sum(predictions, axis=1, keepdims=True)  # shape (m, K)
     predicted_label = np.argmax(predictions, axis=1)[0]
     confidence = predictions[0, predicted_label]
-    return predictions / np.sum(predictions, axis=1, keepdims=True), predicted_label, confidence
+    return int(predicted_label), predictions.tolist()
 
 # ===========================
 #  Routes
@@ -43,8 +44,39 @@ def classify():
     b64data = data["image"]
     header, encoded = b64data.split(",", 1)
     img_bytes = base64.b64decode(encoded)
-    img = Image.open(io.BytesIO(img_bytes)).convert("L").resize((28, 28))
+    # Debug: save the received image to disk for inspection
+
+    # Save as JPEG for easier viewing
+    debug_path = "MNIST_Data/testSample/debug_latest.jpg"
+    img_debug = Image.open(io.BytesIO(img_bytes)).convert("RGB").resize((28, 28))
+    img_debug.save(debug_path, format="JPEG")
+
+    img = Image.open(io.BytesIO(img_bytes)).convert("L")
     arr = np.array(img, dtype=np.float32) / 255.0
+    arr = 1.0 - arr  # Invert: black strokes become white, white background becomes black
+
+    # --- Digit centering preprocessing ---
+    # Threshold to binary image
+    bw = (arr > 0.1).astype(np.uint8)
+    coords = np.argwhere(bw)
+    if coords.size > 0:
+        y0, x0 = coords.min(axis=0)
+        y1, x1 = coords.max(axis=0) + 1
+        arr_cropped = arr[y0:y1, x0:x1]
+        # Pad to square
+        h, w = arr_cropped.shape
+        size = max(h, w)
+        pad_y = (size - h) // 2
+        pad_x = (size - w) // 2
+        arr_square = np.pad(arr_cropped, ((pad_y, size - h - pad_y), (pad_x, size - w - pad_x)), mode='constant')
+    # Resize to 20x20, then paste into center of 28x28
+    from PIL import Image as PILImage
+    digit_img = PILImage.fromarray((arr_square * 255).astype(np.uint8)).resize((20, 20), PILImage.BILINEAR)
+    arr_img = PILImage.new('L', (28, 28), color=0)
+    arr_img.paste(digit_img, (4, 4))
+    arr = np.array(arr_img, dtype=np.float32) / 255.0
+    # Save the preprocessed image for inspection
+    arr_img.save("MNIST_Data/testSample/debug_preprocessed.jpg", format="JPEG")
 
     pred, probs = classify_image(arr)
     return jsonify({"prediction": pred, "probs": probs})
