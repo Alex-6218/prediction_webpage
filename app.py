@@ -26,7 +26,7 @@ def classify_image(img_arr_28x28):
 
     logitsZ = x @ weightsT + biasB # shape (m, K)
     predictions = np.array([np.clip(np.exp(logitsZ[logit, :] - np.max(logitsZ[logit, :])), 0, None) for logit in range(logitsZ.shape[0])]) #Softmax logits to get prediction vector of shape (m, K)
-    predictions = predictions / np.sum(predictions, axis=1, keepdims=True)  # shape (m, K)
+  #  predictions = predictions / np.sum(predictions, axis=1, keepdims=True)  # shape (m, K)
     predicted_label = np.argmax(predictions, axis=1)[0]
     confidence = predictions[0, predicted_label]
     return int(predicted_label), predictions.tolist()
