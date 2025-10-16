@@ -10,12 +10,6 @@ n = 784
 epochs = 0
 inputX = np.zeros((1, n))   
 labelsY = np.zeros((1, K))
-if os.path.isfile("softmax_params.npz"):
-    print("Loading existing parameters from softmax_params.npz")
-    params = np.load("softmax_params.npz")
-    weightsT = params["Theta"]
-    biasB = params["b"]
-
 #Load images from the training set folder and modifying them as necessary for use in training
 # this was the weirdest part of this project for me lol
 def load_images_from_folder(folder, img_size=(28,28)):
@@ -38,13 +32,11 @@ def load_images_from_folder(folder, img_size=(28,28)):
                 labels.append(label_one_hot)
     return np.array(data), np.array(labels)
 
-#user input to determine if they want to train or test
-choice = input("Press Enter for test or 't' for train: ").strip().lower()
-if choice == 't':
-    weightsT = np.random.randn(n, K) * 0.01  # small random values
-    biasB = np.zeros((1, K))                 # initialize biases to zero
-    epochs = 0
-    inputX, labelsY = load_images_from_folder('./MNIST_Data/trainingSet/trainingSet')
+input("Press Enter to start training...")
+weightsT = np.random.randn(n, K) * 0.01  # small random values
+biasB = np.zeros((1, K))                 # initialize biases to zero
+epochs = 0
+inputX, labelsY = load_images_from_folder('./MNIST_Data/trainingSet/trainingSet')
 
 
 def prediction(x, weights):
@@ -106,33 +98,5 @@ def train():
         epoch_loss += batch_loss
         epochs += 1
 
-#handle testing and displaying results
-#this was like 70 percent ai generated lol sorry guys
-if choice == 't':
+if __name__ == "__main__":
     train()
-else:
-    print("Please provide a test image number (between 1 and 28000): ")
-    test_image_number = input().strip()
-    if not test_image_number.isdigit():
-        print(f"Invalid input: {test_image_number} is not a number.")
-    else:
-        test_image_number = int(test_image_number)
-        test_file = f"./MNIST_Data/testSet/testSet/img_{test_image_number}.jpg"
-        if not os.path.isfile(test_file):
-            print(f"File not found: {test_file}")
-            sys.exit(1)
-        img = Image.open(test_file).convert("L")  # grayscale
-        img = img.resize((28,28))                 # force 28x28 if needed
-        arr = np.array(img).astype(np.float32) / 255.0
-        testX = arr.flatten().reshape(1, -1)      # flatten 28x28 → 784 and reshape to (1, 784)
-
-        pred = prediction(testX, weightsT)
-        predicted_label = np.argmax(pred, axis=1)[0]
-        confidence = pred[0, predicted_label]
-
-        print(f"Predicted label: {predicted_label} with confidence {confidence:.4f}")
-
-        plt.imshow(arr, cmap='gray')
-        plt.title(f"Predicted: {predicted_label} (Confidence: {confidence:.4f})")
-        plt.axis('off')
-        plt.show()
