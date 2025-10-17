@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import sys, os
+import os
 
 train_files_path = ''
 test_file = ''
@@ -19,7 +19,7 @@ def load_images_from_folder(folder, img_size=(28,28)):
         print(f"Loading images from: {path}")
         for filename in os.listdir(path):
             if filename.endswith(".jpg"):
-                print(f"Processing file: {filename}")
+                print(f"Processing file: {path}/{filename}")
                 img_path = os.path.join(path, filename)
                 img = Image.open(img_path).convert("L")  # grayscale
                 img = img.resize(img_size)               # force 28x28 if needed
@@ -31,8 +31,6 @@ def load_images_from_folder(folder, img_size=(28,28)):
                 label_one_hot[label] = 1
                 labels.append(label_one_hot)
     return np.array(data), np.array(labels)
-
-input("Press Enter to start training...")
 weightsT = np.random.randn(n, K) * 0.01  # small random values
 biasB = np.zeros((1, K))                 # initialize biases to zero
 epochs = 0
@@ -58,7 +56,7 @@ def grad_B(x, y):
     return gradient
 
 def train():
-    global inputX, labelsY, weightsT, biasB, epochs, choice
+    global inputX, labelsY, weightsT, biasB, epochs
     #calculate number of batches to make
     num_batches = inputX.shape[0] // 64
     lr = 0.06 # learning rates for bias and weights
@@ -99,4 +97,5 @@ def train():
         epochs += 1
 
 if __name__ == "__main__":
+    input("Press Enter to start training...")
     train()
