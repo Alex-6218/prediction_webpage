@@ -3,11 +3,9 @@ import base64, io
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 app = Flask(__name__)
 
-# ===========================
-# 👉  plug in your algorithm here
-# ===========================
 K = 10
 n = 784
 epochs = 0
@@ -76,7 +74,8 @@ def classify():
     arr_img.paste(digit_img, (4, 4))
     arr = np.array(arr_img, dtype=np.float32) / 255.0
     # Save the preprocessed image for inspection
-    arr_img.save("MNIST_Data/testSample/debug_preprocessed.jpg", format="JPEG")
+    img_number = len(os.listdir("MNIST_Data/userInput/"))
+    arr_img.save("MNIST_Data/userInput/img_" + str(img_number+1) + ".jpg", format="JPEG")
 
     pred, probs = classify_image(arr)
     return jsonify({"prediction": pred, "probs": probs})

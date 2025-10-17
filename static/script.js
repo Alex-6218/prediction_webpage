@@ -65,7 +65,6 @@ document.getElementById("submit").onclick = async () => {
   console.log('small canvas sample gray pixels:', gray);
   const dataURL = small.toDataURL("image/png");
 
-  // --- Additional debug: sample the main canvas pixels too ---
   try {
     const mainImg = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const mainGray = [];
